@@ -1,4 +1,4 @@
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Annotated
 
 from sqlalchemy import (
     CursorResult,
@@ -12,6 +12,8 @@ from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.config import settings
+
+from fastapi import Depends
 
 DATABASE_URL = str(settings.DATABASE_ASYNC_URL)
 
@@ -41,7 +43,6 @@ async def fetch_one(
     return result._asdict() if result else None
 
 
-# Modify fetch_all
 async def fetch_all(
     select_query: Select | Insert | Update,
     connection: AsyncSession,
@@ -80,3 +81,5 @@ async def _execute_query(
 async def get_db_connection() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         yield session
+
+SessionDep = Annotated[AsyncSession, Depends(get_db_connection)]

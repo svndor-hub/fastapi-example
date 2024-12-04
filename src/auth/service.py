@@ -35,7 +35,8 @@ def get_password_hash(password):
 
 async def authenticate_user(session: SessionDep, username: str, password: str):
     query = select(User).where(User.username == username)
-    user = await fetch_one(query, session)
+    user = await session.execute(query)
+    user = user.scalar_one_or_none()
     if not user:
         return False
     if not verify_password(password, user.hashed_password):

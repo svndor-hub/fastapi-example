@@ -9,7 +9,7 @@ from jwt.exceptions import InvalidTokenError
 from src.auth.config import settings
 from src.auth.schemas import TokenData
 from src.auth.models import User
-from src.database import fetch_one, get_db_connection
+from src.database import fetch_one, SessionDep
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
-SessionDep = Annotated[AsyncSession, Depends(get_db_connection)]
 
 
 async def get_current_user(token: TokenDep, session: SessionDep):
@@ -36,7 +35,8 @@ async def get_current_user(token: TokenDep, session: SessionDep):
         raise credentials_exception
     
     query = select(User).where(User.username == token_data.username)
-    user = fetch_one(query, session)
+    user = await session.execute(query)
+    user = user.scalar_one_or_none()
     if user is None:
         raise credentials_exception
     return user

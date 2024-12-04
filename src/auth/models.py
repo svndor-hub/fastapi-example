@@ -8,5 +8,5 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str]
     email: Mapped[str] = mapped_column(unique=True)
-    disabled: Mapped[bool]
+    disabled: Mapped[bool] = mapped_column(default=False)
     hashed_password: Mapped[str]
