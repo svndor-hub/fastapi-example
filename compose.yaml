@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./:/app:ro
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_ASYNC_URL: ${DATABASE_ASYNC_URL}
+      SECRET_KEY: ${SECRET_KEY}
+    ports:
+      - "8000:80"
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
