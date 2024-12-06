@@ -1,9 +1,8 @@
 
 # Example FastAPI Project
+REST API написанный на FastAPI, с интеграцией [randomuser.me]()
 
-
-
-
+База данных - PostgreSQL, сервис запущен на AWS EC2 с использованием Docker Compose и Caddy (reverse proxy).
 ## Инструкция для локального запуска
 В решении используется контейнеризация, поэтому сначала нужно установить Docker и Docker Compose:
 
@@ -63,3 +62,74 @@ docker-compose exec web alembic upgrade head
 
 ### Остановка приложения
 `docker-compose down`
+## Описание эндпоинтов и примеры запросов
+
+### Эндпоинты с использованием внешнего API (randomuser.me)
+
+`GET /randomuser/test` - Тестовый эндпоинт, возвращает данные рандомно сгенерированного пользователя. 
+
+Curl:
+```
+curl -X 'GET' \
+  'http://127.0.0.1:8000/randomuser/test' \
+  -H 'accept: application/json'
+```
+
+`POST /randomuser/save` - Получает рандомного пользователя с randomuser.me, и сохраняет его в базе данных.
+
+Curl:
+```
+curl -X 'POST' \
+  'http://127.0.0.1:8000/randomuser/save' \
+  -H 'accept: application/json' \
+  -d ''
+```
+
+### Авторизация (OAuth2 с JWT)
+`POST /token` - Авторизация с username и password, возвращает access token.
+
+Curl:
+```
+curl -X 'POST' \
+  'http://127.0.0.1:8000/token' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=password&username=USERNAME&password=PASSWORD&scope=&client_id=string&client_secret=string'
+```
+
+Некоторые защищенные эндпоинты для проверки авторизации:
+`GET /users/me` - Возвращает данные авторизованного пользователя.
+
+Curl:
+```
+curl -X 'GET' \
+  'http://127.0.0.1:8000/users/me/' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer access_token'
+```
+
+### CRUD эндпоинты users
+`GET /users` - Получить всех пользователей
+
+`POST /users` - Создать пользователя
+
+```
+curl -X 'POST' \
+  'http://127.0.0.1:8000/users/' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "username": "string",
+  "email": "string",
+  "password": "string"
+}'
+```
+
+`GET /users/{user_id}` - Получить пользователя по id
+
+`PUT /users/{user_id}` - Обновить пользователя
+
+`DELETE /users/{user_id}` - Удалить пользователя
+## Ссылка на развернутый сервис
+
+[sanzhar.tech/docs]()
